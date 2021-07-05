@@ -1,0 +1,4 @@
+*.o
+build/*
+!build/.noempty
+.vscode
