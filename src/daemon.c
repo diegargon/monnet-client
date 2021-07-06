@@ -14,7 +14,7 @@ void signal_handler(int signal_number) {
 
 
 void start_daemon(void (*client_main)()) {
-    /* TODO  daemon*/
+    /* TODO Become daemon*/
         /* Signals */
 
     signal(SIGHUP, signal_handler);

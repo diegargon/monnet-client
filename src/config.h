@@ -10,5 +10,5 @@
 #define SERVER_PORT 20000
 #define SERVER_IP  "192.168.2.10"
 #define CLIENT_AUTH "abcdefgh"
-
+#define END_HEAD "\r\n\r\n"
 #endif
