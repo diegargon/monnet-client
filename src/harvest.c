@@ -62,21 +62,23 @@ float get_loadavg()
     return (int)info.loads[0] * f_load * 100 / get_nprocs();
 }
 
-void get_kernel()
+ bool get_kernel(char *buffer)
 {
-    struct utsname buf;
+    struct utsname utsbuf;
+    
+    memset(&utsbuf, 0, sizeof utsbuf);
 
-    memset(&buf, 0, sizeof buf);
-
-    if (uname(&buf) < 0)
-    {
-        //return;
-    }
-    printf("Sysname: %s \n", buf.sysname);
-    printf("Nodename: %s \n", buf.nodename);
-    printf("Release: %s \n", buf.release);
-    printf("Version: %s \n", buf.version);
-    printf("Machine: %s \n", buf.machine);
+    if (uname(&utsbuf) < 0)
+        return false;
+    
+    
+    sprintf(buffer, "Sysname:%s\r\n", utsbuf.sysname);
+    sprintf(buffer + strlen(buffer), "Nodename:%s\r\n", utsbuf.nodename);
+    sprintf(buffer + strlen(buffer), "Release:%s\r\n", utsbuf.release);
+    sprintf(buffer + strlen(buffer), "Version:%s\r\n", utsbuf.version);
+    sprintf(buffer + strlen(buffer), "Machine:%s\r\n", utsbuf.machine);
+    
+    return true;
 }
 
 char *get_distro()

@@ -1,7 +1,7 @@
 CC = gcc
 CFLAGS  = -Wall -g  -std=gnu99
 LFLAGS = 
-LIBS = -pthread -lnsl
+LIBS = 
 INCLUDES = 
 BUILD_DIR = build
 SRCS_DIR = src

@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include <time.h>
 #include <stdbool.h>
+#include <string.h>
 #include "monnet-client.h"
 #include "comm.h"
 #include "harvest.h"
@@ -20,6 +21,7 @@ void monnet_client()
     char *msg = {0};
     int socket_fd = -1;
     int hello = 0;
+    char *payload;
 
     while (1)
     {
@@ -29,14 +31,20 @@ void monnet_client()
             {
                 if ( (socket_fd = server_connect()) > 0)
                 {
-                    msg = build_msg("HELLO", NULL);
-                    if (send_msg(socket_fd, msg))
-                        hello = 1;
+                    payload = get_hello_payload();
+                    printf("Payload size: %ld\n", strlen(payload));
+                    msg = build_msg("HELLO", 1, payload);
+                    if (send_msg(socket_fd, msg)) {
+                        receive_msg(socket_fd);
+                        //hello = 1;
+                    }
+                        
+                    free(msg); 
+                    free(payload);                       
                     server_disconnect(socket_fd);
                 }
             } else  {
-                printf("*");
-                fflush(stdout);
+                //Hello ok
             }
 
 
@@ -65,6 +73,6 @@ void monnet_client()
         }
         */
 
-        sleep(1);
+        sleep(5);
     }
 }

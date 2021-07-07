@@ -7,17 +7,8 @@
 #define HARVEST_H
 
 float get_loadavg();
-void get_kernel();
+bool get_kernel(char *buffer);
 struct sysinfo get_sysinfo();
 char *get_distro();
-
-/*
-struct TEST {    
-    int numbers[5];
-    char *load[5];
-    
-} test;
-
-*/
 
 #endif
