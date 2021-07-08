@@ -9,6 +9,7 @@
 #include <time.h>
 #include <stdbool.h>
 #include <string.h>
+#include "config.h"
 #include "monnet-client.h"
 #include "utils.h"
 #include "comm.h"
@@ -37,11 +38,12 @@ void monnet_client()
                     payload = get_hello_payload();
                     hello_head->size = strlen(payload);
                     hello_head->ack = 1;
+                    strcpy(hello_head->auth, CLIENT_AUTH);
                     strcpy(hello_head->msg, "HELLO");
                     if (send_msg(socket_fd, &hello_head, payload))
                     {
                         printf("Msg send OK\n");
-                        hello = 1;
+                        //hello = 1;
                     }
                     else
                     {

@@ -19,7 +19,7 @@ char *build_msg(struct MonnetHeader *mheader, char *payload)
     char *header = (char *)malloc(sizeof(char) * 1024);
 
     sprintf(header, "Version:%d\r\n", VERSION);
-    sprintf(header + strlen(header), "Auth:%s\r\n", CLIENT_AUTH);
+    sprintf(header + strlen(header), "Auth:%s\r\n", mheader->auth);
     sprintf(header + strlen(header), "Ack:%d\r\n", mheader->ack);
     sprintf(header + strlen(header), "Msg:%s\r\n", mheader->msg);
     sprintf(header + strlen(header), "Size:%ld\r\n", mheader->size);
@@ -113,7 +113,7 @@ bool receive_msg(int socket_fd, struct MonnetHeader **mHeader, char *payload)
         //printf("ENDHEAD (%ld) -> *%s*\n", strlen(end_head) - strlen(END_HEAD) -2, end_head+strlen(END_HEAD)+2);
 
         *mHeader = get_header(read_buffer);
-
+        //Get rest if any payload
         if (recv_extra < (*mHeader)->size)
         {
             printf("Head:OK: Payload: PARTIALLY (R:%ld/P:%ld)\n", recv_extra, (*mHeader)->size);
@@ -147,12 +147,22 @@ bool receive_msg(int socket_fd, struct MonnetHeader **mHeader, char *payload)
             //rid head
             strcpy(payload, (end_head + strlen(END_HEAD) + 2));
         }
-        //sendBuffer = build_msg("ACK", NULL);
+        //Send ACK if sender want
+        if ((*mHeader)->ack == 1)
+        {
+            struct MonnetHeader *reply_head = malloc(sizeof(struct MonnetHeader));
+            reply_head->size = 0;
+            reply_head->ack = 0;
+            strcpy(reply_head->auth, (*mHeader)->auth);
+            strcpy(reply_head->msg, "ACK");
+            send_msg(socket_fd, &reply_head, NULL);
+            free(reply_head);
+        }        
     }
     else
     {
         //Not valid head found
-        //sendBuffer = build_msg("NACK", NULL);
+        return false;
     }
 
     printf("Response (%ld):\n%s", recive_total_bytes, payload);
