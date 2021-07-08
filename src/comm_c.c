@@ -18,10 +18,10 @@ char *get_hello_payload()
 {
     char *buffer = (char *)malloc(sizeof(char) * 1024);
 
-    if (get_kernel(buffer))
-        return buffer;
-    else
-        return NULL;
+    sprintf(buffer, "Id:%s\r\n", CLIENT_ID);
+    get_kernel(buffer);
+
+    return buffer;
 }
 
 int server_connect()
