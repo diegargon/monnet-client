@@ -3,11 +3,11 @@
  * 
  */
 
-
 #ifndef UTILS_H
 #define UTILS_H
 
-struct MonnetHeader {
+struct MonnetHeader
+{
     int version;
     int ack;
     char auth[32];
@@ -18,7 +18,6 @@ struct MonnetHeader {
 char *ltrim(char *s);
 char *rtrim(char *s);
 char *trim(char *s);
-size_t get_payload_size(char *buf);
-struct MonnetHeader get_header(char *header);
+struct MonnetHeader *get_header(char *header);
 
 #endif

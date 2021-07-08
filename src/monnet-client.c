@@ -10,12 +10,12 @@
 #include <stdbool.h>
 #include <string.h>
 #include "monnet-client.h"
+#include "utils.h"
 #include "comm.h"
 #include "harvest.h"
 
 void monnet_client()
 {
-    //int loadavg = 0;
     time_t last_time = 0;
     int update_cycle = 5;
     char *msg = {0};
@@ -29,24 +29,35 @@ void monnet_client()
         {
             if (hello == 0)
             {
-                if ( (socket_fd = server_connect()) > 0)
+                if ((socket_fd = server_connect()) > 0)
                 {
+                    //struct MonnetHeader *hello_head = NULL;
+                    struct MonnetHeader *hello_head = malloc(sizeof(struct MonnetHeader));
                     payload = get_hello_payload();
-                    printf("Payload size: %ld\n", strlen(payload));
-                    msg = build_msg("HELLO", 1, payload);
-                    if (send_msg(socket_fd, msg)) {
-                        receive_msg(socket_fd);
-                        //hello = 1;
+                    hello_head->size = strlen(payload);
+                    hello_head->ack = 1;
+                    strcpy(hello_head->msg, "HELLO");
+                    if (send_msg(socket_fd, &hello_head, payload))
+                    {
+                        printf("Msg send OK\n");
+                        hello = 1;
                     }
-                        
-                    free(msg); 
-                    free(payload);                       
+                    else
+                    {
+                        printf("Msg Send FAIL\n");
+                    }
+
+                    free(msg);
+                    free(payload);
+                    free(hello_head);
+
                     server_disconnect(socket_fd);
                 }
-            } else  {
+            }
+            else
+            {
                 //Hello ok
             }
-
 
             /*
             msg = build_msg("HELLO", NULL);
