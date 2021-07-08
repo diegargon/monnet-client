@@ -6,16 +6,13 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
-#include <unistd.h>
-#include <stdbool.h>
 #include "config.h"
 #include "utils.h"
 #include "comm.h"
-#include "error.h"
-#include "harvest.h"
 
 char *build_msg(struct MonnetHeader *mheader, char *payload)
 {
@@ -31,72 +28,6 @@ char *build_msg(struct MonnetHeader *mheader, char *payload)
         sprintf(header + strlen(header), "%s", payload);
 
     return header;
-}
-
-char *get_hello_payload()
-{
-    char *buffer = (char *)malloc(sizeof(char) * 1024);
-
-    if (get_kernel(buffer))
-        return buffer;
-    else
-        return NULL;
-}
-
-int server_connect()
-{
-    int socket_fd = -1;
-    int port = SERVER_PORT;
-    char *server_ip = SERVER_IP;
-    struct sockaddr_in address;
-    struct timeval tm;
-
-    tm.tv_sec = 10;
-    tm.tv_usec = 0;
-
-    //Create socket
-    if ((socket_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
-    {
-        error_warning("Server Connect: Socket creation error");
-        return -1;
-    }
-
-    /* Fill IPv4 struct */
-
-    memset(&address, 0, sizeof address);
-    address.sin_family = AF_INET;
-    address.sin_port = htons(port);
-    /* Set ip */
-    if ((inet_pton(AF_INET, server_ip, &address.sin_addr)) <= 0)
-    {
-        error_warning("Server Connect: Invalid address");
-        return -1;
-    }
-
-    if ((setsockopt(socket_fd, SOL_SOCKET, SO_RCVTIMEO, &tm, sizeof(struct timeval))) < 0)
-    {
-        printf("Error setting recive timeout\n");
-    }
-
-    if ((setsockopt(socket_fd, SOL_SOCKET, SO_SNDTIMEO, &tm, sizeof(struct timeval))) < 0)
-    {
-        printf("Error setting send timeout\n");
-    }
-
-    if ((connect(socket_fd, (struct sockaddr *)&address, sizeof(address))) < 0)
-    {
-        error_warning("Server Connect: Connection Failed");
-        return -1;
-    }
-
-    return socket_fd;
-}
-
-bool server_disconnect(int socket_fd)
-{
-    printf("Discconect from server\n");
-    close(socket_fd);
-    return true;
 }
 
 bool send_msg(int socket_fd, struct MonnetHeader **mHeader, char *payload)
@@ -227,4 +158,46 @@ bool receive_msg(int socket_fd, struct MonnetHeader **mHeader, char *payload)
     printf("Response (%ld):\n%s", recive_total_bytes, payload);
 
     return true;
+}
+
+
+struct MonnetHeader *get_header(char *header)
+{
+    struct MonnetHeader *mheader = malloc(sizeof(struct MonnetHeader));
+    char key[31];
+    char val[31];
+    char *line = strtok(strdup(header), "\r\n");
+
+    while (line)
+    {
+        if (sscanf(line, "%31[a-zA-Z_0-9]:%31s", key, val) == 2)
+        {
+
+            if (strcmp(key, "Version") == 0)
+            {
+                mheader->version = atoi(val);
+            }
+            if (strcmp(key, "Auth") == 0)
+            {
+                //mheader.auth = malloc(strlen(val)+1);
+                strcpy(mheader->auth, val);
+            }
+            if (strcmp(key, "Size") == 0)
+            {
+                mheader->size = atoi(val);
+            }
+            if (strcmp(key, "Ack") == 0)
+            {
+                mheader->ack = atoi(val);
+            }
+            if (strcmp(key, "Msg") == 0)
+            {
+                //mheader.msg = malloc(strlen(val)+1);
+                strcpy(mheader->msg, val);
+            }
+        }
+        line = strtok(NULL, "\r\n");
+    }
+
+    return mheader;
 }

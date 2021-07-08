@@ -12,6 +12,7 @@
 #include "monnet-client.h"
 #include "utils.h"
 #include "comm.h"
+#include "comm_c.h"
 #include "harvest.h"
 
 void monnet_client()

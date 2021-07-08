@@ -6,12 +6,7 @@
 #include <signal.h>
 #include <stdlib.h>
 #include <syslog.h>
-
-void signal_handler(int signal_number) {    
-    syslog(LOG_WARNING, "Received signal.");
-    exit(0);
-}
-
+#include "signals.h"
 
 void start_daemon(void (*client_main)()) {
     /* TODO Become daemon*/
