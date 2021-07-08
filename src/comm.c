@@ -143,7 +143,7 @@ bool receive_msg(int socket_fd, struct MonnetHeader **mHeader, char *payload)
         {
             printf("Head:OK Payload: OK (R:%ld/P:%ld)\n", recv_extra, (*mHeader)->size);
             printf("Msg-> %s\n", (*mHeader)->msg);
-            payload = (char *)malloc(sizeof(char) * strlen(end_head));
+            payload = (char *)malloc(sizeof(char) * strlen(end_head) + 1);
             //rid head
             strcpy(payload, (end_head + strlen(END_HEAD) + 2));
         }
@@ -157,7 +157,7 @@ bool receive_msg(int socket_fd, struct MonnetHeader **mHeader, char *payload)
             strcpy(reply_head->msg, "ACK");
             send_msg(socket_fd, &reply_head, NULL);
             free(reply_head);
-        }        
+        }
     }
     else
     {
@@ -169,7 +169,6 @@ bool receive_msg(int socket_fd, struct MonnetHeader **mHeader, char *payload)
 
     return true;
 }
-
 
 struct MonnetHeader *get_header(char *header)
 {
