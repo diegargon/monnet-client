@@ -53,10 +53,10 @@ bool send_msg(int socket_fd, struct MonnetHeader **mHeader, char *payload)
     //Send ask for ACK
     if ((*mHeader)->ack == 1)
     {
-        char *response_payload = {0};
+        char *response_payload = NULL;
         struct MonnetHeader *response_head = malloc(sizeof(struct MonnetHeader));
 
-        if (receive_msg(socket_fd, &response_head, response_payload))
+        if (receive_msg(socket_fd, &response_head, &response_payload))
         {
             if (strcmp(response_head->msg, "ACK") == 0)
             {
@@ -75,7 +75,7 @@ bool send_msg(int socket_fd, struct MonnetHeader **mHeader, char *payload)
     return true;
 }
 
-bool receive_msg(int socket_fd, struct MonnetHeader **mHeader, char *payload)
+bool receive_msg(int socket_fd, struct MonnetHeader **mHeader, char **payload)
 {
     char read_buffer[8192] = {0};
     int read_bytes = 0;
@@ -108,7 +108,7 @@ bool receive_msg(int socket_fd, struct MonnetHeader **mHeader, char *payload)
     }
     if (end_head != NULL)
     {
-        printf("End head (%ld) *%s*\n", strlen(end_head), end_head + strlen(END_HEAD));
+        //printf("End head (%ld) *%s*\n", strlen(end_head), end_head + strlen(END_HEAD));
         size_t recv_extra = strlen(end_head) - strlen(END_HEAD);
         //printf("ENDHEAD (%ld) -> *%s*\n", strlen(end_head) - strlen(END_HEAD) -2, end_head+strlen(END_HEAD)+2);
 
@@ -141,14 +141,17 @@ bool receive_msg(int socket_fd, struct MonnetHeader **mHeader, char *payload)
         }
         else
         {
-            printf("Head:OK Payload: OK (R:%ld/P:%ld)\n", recv_extra, (*mHeader)->size);            
-            printf("Msg-> %s\n", (*mHeader)->msg);
-            payload = (char *)malloc(sizeof(char) * strlen(end_head) + 1);
+            printf("Head:OK Payload: OK (R:%ld/P:%ld)\n", recv_extra, (*mHeader)->size);
+            //printf("Msg-> %s\n", (*mHeader)->msg);
+            *payload = (char *)malloc(sizeof(char) * strlen(end_head) + 1);
             //rid head
-            if(strlen(end_head) <= strlen(END_HEAD)) { 
-                payload = NULL; 
-            } else {               
-                strcpy(payload, (end_head + strlen(END_HEAD)));
+            if (strlen(end_head) <= strlen(END_HEAD))
+            {
+                payload = NULL;
+            }
+            else
+            {
+                strcpy(*payload, (end_head + strlen(END_HEAD)));
             }
         }
         //Send ACK if sender want
@@ -169,7 +172,7 @@ bool receive_msg(int socket_fd, struct MonnetHeader **mHeader, char *payload)
         return false;
     }
 
-    printf("Response (%ld):\n%s", recive_total_bytes, payload);
+    //printf("Response (%ld):\n%s", recive_total_bytes, (*payload));
 
     return true;
 }
