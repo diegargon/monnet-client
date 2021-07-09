@@ -12,4 +12,5 @@
 #define CLIENT_ID   "trantor"
 #define CLIENT_AUTH "abcdefgh"
 #define END_HEAD "\r\n\r\n"
+//#define END_HEAD "[EOHEOH]"
 #endif

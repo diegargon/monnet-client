@@ -23,7 +23,7 @@ char *build_msg(struct MonnetHeader *mheader, char *payload)
     sprintf(header + strlen(header), "Ack:%d\r\n", mheader->ack);
     sprintf(header + strlen(header), "Msg:%s\r\n", mheader->msg);
     sprintf(header + strlen(header), "Size:%ld\r\n", mheader->size);
-    sprintf(header + strlen(header), "\r\n\r\n");
+    sprintf(header + strlen(header), END_HEAD);
     if (mheader->size > 0)
         sprintf(header + strlen(header), "%s", payload);
 
@@ -108,8 +108,8 @@ bool receive_msg(int socket_fd, struct MonnetHeader **mHeader, char *payload)
     }
     if (end_head != NULL)
     {
-        printf("End head (%ld) *%s*\n", strlen(end_head), end_head);
-        size_t recv_extra = strlen(end_head) - strlen(END_HEAD) - 1;
+        printf("End head (%ld) *%s*\n", strlen(end_head), end_head + strlen(END_HEAD));
+        size_t recv_extra = strlen(end_head) - strlen(END_HEAD);
         //printf("ENDHEAD (%ld) -> *%s*\n", strlen(end_head) - strlen(END_HEAD) -2, end_head+strlen(END_HEAD)+2);
 
         *mHeader = get_header(read_buffer);
@@ -118,7 +118,7 @@ bool receive_msg(int socket_fd, struct MonnetHeader **mHeader, char *payload)
         {
             printf("Head:OK: Payload: PARTIALLY (R:%ld/P:%ld)\n", recv_extra, (*mHeader)->size);
             //rid head
-            strcpy(read_buffer, (end_head + strlen(END_HEAD) + 2));
+            strcpy(read_buffer, (end_head + strlen(END_HEAD)));
 
             paytotal = strlen(read_buffer);
             printf("Paytotal %d / Pay %ld\n", paytotal, (*mHeader)->size);
@@ -141,11 +141,15 @@ bool receive_msg(int socket_fd, struct MonnetHeader **mHeader, char *payload)
         }
         else
         {
-            printf("Head:OK Payload: OK (R:%ld/P:%ld)\n", recv_extra, (*mHeader)->size);
+            printf("Head:OK Payload: OK (R:%ld/P:%ld)\n", recv_extra, (*mHeader)->size);            
             printf("Msg-> %s\n", (*mHeader)->msg);
             payload = (char *)malloc(sizeof(char) * strlen(end_head) + 1);
             //rid head
-            strcpy(payload, (end_head + strlen(END_HEAD) + 2));
+            if(strlen(end_head) <= strlen(END_HEAD)) { 
+                payload = NULL; 
+            } else {               
+                strcpy(payload, (end_head + strlen(END_HEAD)));
+            }
         }
         //Send ACK if sender want
         if ((*mHeader)->ack == 1)

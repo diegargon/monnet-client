@@ -75,7 +75,7 @@ int server_connect()
 
 bool server_disconnect(int socket_fd)
 {
-    printf("Discconect from server\n");
+    printf("Disconnect from server\n");
     close(socket_fd);
     return true;
 }
